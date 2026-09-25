@@ -1,0 +1,30 @@
+# Private working notes
+NOTES.md
+PROGRESS.md
+PUBLISH-NOTES.md
+CALIBRATION-LOG-*.md
+
+# Pre-rename style folders, superseded by styles/NoSlop and styles/NoSlopCode
+styles/Legacy/
+styles/LegacyCode/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Batch runner output
+*.tsv
+
+# OS and editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+.idea/
+
+# Release zips from tools/build_release.py
+dist/

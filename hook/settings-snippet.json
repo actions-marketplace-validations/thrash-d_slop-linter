@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"SLOP_LINTER_DIR\\hook\\vale-hook.ps1\""
+          }
+        ]
+      }
+    ]
+  }
+}
