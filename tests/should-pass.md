@@ -43,6 +43,18 @@ The vendor's guide says "retention should delve into business needs." We read th
 
 That quote is from the last real restore, in August 2026.
 
+## MFA (Multi-Factor Authentication)
+
+Every admin sign-in needs a second factor. The policy maps to the access control practice.
+
+## Application control (3.4.9)
+
+Only approved programs run on the file server.
+
+## Access control (AC.L2-3.1.5)
+
+Admins use a separate account for admin work.
+
 ## Restore history
 
 Restores by year: 2024 14; 2025 22; 2026 9; total 45.

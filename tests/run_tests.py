@@ -4,8 +4,8 @@
 
 1. Every rule fires at least once on tests/slop-sample.md or
    tests/slop-sample.py, so no rule is silently dead.
-2. tests/should-pass.md and tests/should-pass.py produce zero alerts at any
-   level, so ordinary writing doesn't trip a rule.
+2. tests/should-pass.md, .py, and .html produce zero alerts at any level,
+   so ordinary writing doesn't trip a rule.
 
 Uses vale from PATH, or the path in the VALE environment variable. Exits 1 if
 either check fails.
@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / ".vale.ini"
 VALE = os.environ.get("VALE", "vale")
 DIRTY = {"NoSlop": ROOT / "tests" / "slop-sample.md", "NoSlopCode": ROOT / "tests" / "slop-sample.py"}
-CLEAN = [ROOT / "tests" / "should-pass.md", ROOT / "tests" / "should-pass.py"]
+CLEAN = [ROOT / "tests" / "should-pass.md", ROOT / "tests" / "should-pass.py", ROOT / "tests" / "should-pass.html"]
 
 
 def lint(path: Path) -> list[dict]:

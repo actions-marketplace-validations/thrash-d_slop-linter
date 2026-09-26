@@ -7,10 +7,15 @@ Two things a plain `vale <dir>` gets wrong that this handles:
     stdin as .js/.ts so they get linted.
   - It ranks hits by rule and by file so you triage instead of scrolling.
 
-Excludes build/vendor/VCS dirs by default. It does not exclude data/ or any
+Inside a git repo it lints only files git tracks, so local notes, captures,
+and ignored data stay out of the counts. -All lints every file in the tree
+instead, tracked or not. Outside a git repo it always walks the tree.
+
+Excludes build/vendor/VCS dirs either way. It does not exclude data/ or any
 content dir; pass those with -Exclude per run when you don't want them.
 
   .\run-qa.ps1 -Path C:\path\to\project
+  .\run-qa.ps1 -Path C:\path\to\project -All
   .\run-qa.ps1 -Path C:\path\to\project -Exclude data,chrome,firefox
   .\run-qa.ps1 -Path C:\path\to\project -Level suggestion -OutFile hits.tsv
 #>
@@ -20,7 +25,8 @@ param(
   [ValidateSet("suggestion","warning","error")][string]$Level = "warning",
   [string]$Config = "$PSScriptRoot\.vale.ini",
   [int]$Top = 15,
-  [string]$OutFile
+  [string]$OutFile,
+  [switch]$All
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,10 +43,32 @@ $code    = ".py",".js",".jsx",".ts",".tsx",".ps1",".psm1",".go",".rs",".rb",".lu
 $stdin   = @{ ".mjs"="js"; ".cjs"="js"; ".mts"="ts"; ".cts"="ts" }
 $allExt  = $prose + $code + ($stdin.Keys)
 
-$files = Get-ChildItem -Path $Path -Recurse -File | Where-Object {
+$Path = (Resolve-Path -LiteralPath $Path).ProviderPath.TrimEnd('\')
+$tracked = $false
+if (-not $All -and (Get-Command git -ErrorAction SilentlyContinue)) {
+  $ErrorActionPreference = "Continue"
+  $inRepo = (git -C $Path rev-parse --is-inside-work-tree 2>$null) -eq "true"
+  if ($inRepo) {
+    # Windows PowerShell 5.1 decodes native output in the OEM code page, which
+    # mangles non-ASCII paths. quotepath=off stops git escaping them as octal.
+    $prevEnc = [Console]::OutputEncoding
+    [Console]::OutputEncoding = New-Object Text.UTF8Encoding $false
+    $list = @(git -C $Path -c core.quotepath=off ls-files 2>$null)
+    [Console]::OutputEncoding = $prevEnc
+    $tracked = $LASTEXITCODE -eq 0
+  }
+  $ErrorActionPreference = "Stop"
+}
+$candidates = if ($tracked) {
+  # A tracked file deleted from the working tree has nothing to lint.
+  $list | ForEach-Object { Join-Path $Path $_ } | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | ForEach-Object { Get-Item -LiteralPath $_ }
+} else {
+  Get-ChildItem -Path $Path -Recurse -File
+}
+$files = @($candidates | Where-Object {
   $allExt -contains $_.Extension.ToLower() -and
   -not ($_.FullName -split '[\\/]' | Where-Object { $skipDirs -contains $_ })
-}
+})
 
 $rows = New-Object System.Collections.Generic.List[object]
 $stdinCount = 0
@@ -74,7 +102,8 @@ foreach ($f in $files) {
 }
 
 Write-Host ""
-Write-Host "Scanned $($files.Count) files ($stdinCount via stdin: .mjs/.cjs/.mts/.cts)"
+$scope = if ($tracked) { "git-tracked only; -All for every file" } else { "every file in the tree" }
+Write-Host "Scanned $($files.Count) files, $scope ($stdinCount via stdin: .mjs/.cjs/.mts/.cts)"
 Write-Host "Total hits (>= $Level): $($rows.Count)"
 Write-Host ""
 Write-Host "By rule:"

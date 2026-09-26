@@ -109,6 +109,8 @@ To sweep a whole project and rank the hits by rule and by file, use the batch ru
 .\run-qa.ps1 -Path C:\src\myproject -Exclude data,dist -Level warning -OutFile hits.tsv
 ```
 
+In a git repo, the runner lints only files git tracks. Add `-All` to lint every file in the tree, tracked or not. Outside a git repo, it always walks the whole tree.
+
 `-Exclude` adds folder names to skip on top of the defaults (`node_modules`, `.git`, `dist`, `build`, virtual environments, and caches). Content folders like `data/` aren't skipped by default, so exclude generated output yourself. `-OutFile` writes every hit as tab-separated values.
 
 ## Run it as a hook
