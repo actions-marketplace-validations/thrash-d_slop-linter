@@ -28,3 +28,8 @@ desktop.ini
 
 # Release zips from tools/build_release.py
 dist/
+
+# Local Claude context, never commit
+CLAUDE.md
+CLAUDE-HISTORY.md
+.claude/
