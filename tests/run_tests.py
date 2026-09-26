@@ -5,7 +5,8 @@
 1. Every rule fires at least once on tests/slop-sample.md or
    tests/slop-sample.py, so no rule is silently dead.
 2. tests/should-pass.md, .py, and .html produce zero alerts at any level,
-   so ordinary writing doesn't trip a rule.
+   so ordinary writing doesn't trip a rule. They're linted twice: with the
+   plain config, and with a vocabulary active, the way dev-kit repos run.
 
 Uses vale from PATH, or the path in the VALE environment variable. Exits 1 if
 either check fails.
@@ -13,8 +14,10 @@ either check fails.
 
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,15 +27,33 @@ DIRTY = {"NoSlop": ROOT / "tests" / "slop-sample.md", "NoSlopCode": ROOT / "test
 CLEAN = [ROOT / "tests" / "should-pass.md", ROOT / "tests" / "should-pass.py", ROOT / "tests" / "should-pass.html"]
 
 
-def lint(path: Path) -> list[dict]:
+def lint(path: Path, config: Path = CONFIG) -> list[dict]:
     result = subprocess.run(
-        [VALE, f"--config={CONFIG}", "--minAlertLevel=suggestion", "--output=JSON", str(path)],
+        [VALE, f"--config={config}", "--minAlertLevel=suggestion", "--output=JSON", str(path)],
         capture_output=True, text=True, encoding="utf-8", check=False,
     )
     if result.returncode > 1:
         sys.exit(f"vale failed on {path.name}: {result.stderr.strip()}")
     data = json.loads(result.stdout or "{}")
     return [alert for alerts in data.values() for alert in alerts]
+
+
+def vocab_config(tmp: Path) -> Path:
+    """Write a copy of the config with a vocabulary active.
+
+    A Vocab changes how Vale applies some rules: it merged into HeadingCase's
+    exceptions and flagged "Run it" as a miscased IT.
+    """
+    styles = tmp / "styles"
+    shutil.copytree(ROOT / "styles", styles)
+    vocab = styles / "config" / "vocabularies" / "Test"
+    vocab.mkdir(parents=True)
+    (vocab / "accept.txt").write_text("[Rr]ealms?\n", encoding="utf-8")
+    text = CONFIG.read_text(encoding="utf-8")
+    text = text.replace("StylesPath = styles", f"StylesPath = {styles.as_posix()}\nVocab = Test", 1)
+    config = tmp / "vocab.ini"
+    config.write_text(text, encoding="utf-8")
+    return config
 
 
 def main() -> int:
@@ -47,12 +68,15 @@ def main() -> int:
             print(f"  dead: {rule}")
         failed |= bool(dead)
 
-    for clean in CLEAN:
-        alerts = lint(clean)
-        print(f"{clean.name}: {len(alerts)} alerts")
-        for a in alerts:
-            print(f"  line {a['Line']}: {a['Check']}: {a['Message']}")
-        failed |= bool(alerts)
+    with tempfile.TemporaryDirectory() as tmp:
+        configs = {"plain": CONFIG, "with vocab": vocab_config(Path(tmp))}
+        for label, config in configs.items():
+            for clean in CLEAN:
+                alerts = lint(clean, config)
+                print(f"{clean.name} ({label}): {len(alerts)} alerts")
+                for a in alerts:
+                    print(f"  line {a['Line']}: {a['Check']}: {a['Message']}")
+                failed |= bool(alerts)
 
     return 1 if failed else 0
 
