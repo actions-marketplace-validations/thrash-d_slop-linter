@@ -116,7 +116,7 @@ To sweep a whole project and rank the hits by rule and by file, use the batch ru
 `hook/vale-hook.ps1` is a Claude Code `PostToolUse` hook. After every Write, Edit, or MultiEdit, it lints what Claude wrote. If anything at warning level or higher is left, it exits with code 2, which sends the hits back to Claude to fix.
 
 - Prose files (`.md` and `.txt`) under a folder named `Writing` are linted whole. The hook straightens curly quotes first.
-- In code files, only the new text is linted: the Edit `new_string`, each MultiEdit edit, or the Write content. Old comments elsewhere in the file never block an edit. Paths under `node_modules`, `.git`, `dist`, `build`, `vendor`, and virtual environments are skipped.
+- In code and HTML files, only the new text is linted: the Edit `new_string`, each MultiEdit edit, or the Write content. Old text elsewhere in the file never blocks an edit. Paths under `node_modules`, `.git`, `dist`, `build`, `vendor`, and virtual environments are skipped.
 
 To install it:
 
@@ -129,6 +129,7 @@ You can change the hook's behavior with a parameter on the hook command or an en
 - `-ProseDir` or `SLOP_LINTER_PROSE_DIR`: the folder name that marks prose. The default is `Writing`. Use `*` to lint every `.md` and `.txt` file Claude writes.
 - `-ProseSkip` or `SLOP_LINTER_PROSE_SKIP`: comma-separated subfolder names to leave alone. The default is `reference,_archive`.
 - `-Vale` or `VALE_BIN`: the path to `vale.exe`, when Vale isn't on `PATH`.
+- `-LocalConfig` or `SLOP_LINTER_LOCAL_CONFIG`: a config path relative to a project root, such as `.vale-local.ini`. When a folder above the edited file has it, the hook uses that config instead of this repo's, so a project can keep its own vocabulary or rule settings.
 
 For example, this `command` value lints prose anywhere under a folder named `docs`:
 

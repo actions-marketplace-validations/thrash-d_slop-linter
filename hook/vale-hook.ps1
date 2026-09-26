@@ -2,8 +2,8 @@
 # Claude just wrote with the NoSlop styles. Exit 2 sends the hits back to Claude.
 #
 # Prose (.md/.txt under a folder named -ProseDir): lints the whole file.
-# Code: lints only the text Claude wrote (Edit new_string, MultiEdit edits,
-# or Write content), so old comments elsewhere in the file don't block an edit.
+# Code and HTML: lints only the text Claude wrote (Edit new_string, MultiEdit
+# edits, or Write content), so old text elsewhere in the file doesn't block an edit.
 #
 # -ProseDir (or $env:SLOP_LINTER_PROSE_DIR): folder name that marks prose.
 #   Default "Writing". Use "*" to lint every .md/.txt file.
@@ -11,11 +11,16 @@
 #   directly under -ProseDir to leave alone (any depth when -ProseDir is "*").
 #   Default "reference,_archive". Pass -ProseSkip '' to skip nothing.
 # -Vale (or $env:VALE_BIN): path to vale.exe when Vale isn't on PATH.
+# -LocalConfig (or $env:SLOP_LINTER_LOCAL_CONFIG): a config path relative to a
+#   project root, such as .devkit\kit\vale.ini. If a folder above the edited file
+#   has it, that config is used instead of this repo's, so per-project settings
+#   and vocabularies apply.
 
 param(
     [string]$ProseDir = $(if ($env:SLOP_LINTER_PROSE_DIR) { $env:SLOP_LINTER_PROSE_DIR } else { 'Writing' }),
     [string]$ProseSkip = $(if ($env:SLOP_LINTER_PROSE_SKIP) { $env:SLOP_LINTER_PROSE_SKIP } else { 'reference,_archive' }),
-    [string]$Vale = $(if ($env:VALE_BIN) { $env:VALE_BIN } else { 'vale' })
+    [string]$Vale = $(if ($env:VALE_BIN) { $env:VALE_BIN } else { 'vale' }),
+    [string]$LocalConfig = $(if ($env:SLOP_LINTER_LOCAL_CONFIG) { $env:SLOP_LINTER_LOCAL_CONFIG } else { '' })
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,8 +32,18 @@ $path = $payload.tool_input.file_path
 if (-not $path) { exit 0 }
 
 $config = Join-Path (Split-Path $PSScriptRoot -Parent) '.vale.ini'
-$codeExt = '\.(py|js|jsx|mjs|cjs|ts|tsx|mts|cts|ps1|psm1|go|rs|c|cpp|h|cs|java|rb|lua|php)$'
-$skipDirs = '[\\/](\.git|node_modules|githubs|dist|build|vendor|\.venv|venv|__pycache__)[\\/]'
+if ($LocalConfig) {
+    $dir = Split-Path -Parent ([IO.Path]::GetFullPath($path))
+    while ($dir) {
+        $candidate = Join-Path $dir $LocalConfig
+        if (Test-Path -LiteralPath $candidate) { $config = $candidate; break }
+        $parent = Split-Path -Parent $dir
+        if ($parent -eq $dir) { break }
+        $dir = $parent
+    }
+}
+$codeExt = '\.(py|js|jsx|mjs|cjs|ts|tsx|mts|cts|ps1|psm1|go|rs|c|cpp|h|cs|java|rb|lua|php|html)$'
+$skipDirs = '[\\/](\.git|\.devkit|node_modules|githubs|dist|build|vendor|\.venv|venv|__pycache__)[\\/]'
 
 function Send-Hits($label, $hits) {
     [Console]::Error.WriteLine("Vale flagged $label. Rewrite each flagged sentence; don't swap in a synonym. Save again when done.")
@@ -49,7 +64,7 @@ function Test-Prose($p) {
     return $true
 }
 
-$isProse = Test-Prose $path
+$isProse = (Test-Prose $path) -and ($path -notmatch $skipDirs)
 $isCode = ($path -match $codeExt) -and ($path -notmatch $skipDirs)
 if (-not $isProse -and -not $isCode) { exit 0 }
 

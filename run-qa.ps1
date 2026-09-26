@@ -32,7 +32,7 @@ $skipDirs = @(
   ".wrangler",".next","vendor",".svelte-kit",".pytest_cache",".mypy_cache"
 ) + $Exclude
 
-$prose   = ".md",".txt"
+$prose   = ".md",".txt",".html"
 $code    = ".py",".js",".jsx",".ts",".tsx",".ps1",".psm1",".go",".rs",".rb",".lua",".php"
 $stdin   = @{ ".mjs"="js"; ".cjs"="js"; ".mts"="ts"; ".cts"="ts" }
 $allExt  = $prose + $code + ($stdin.Keys)
@@ -47,12 +47,20 @@ $stdinCount = 0
 
 foreach ($f in $files) {
   $ext = $f.Extension.ToLower()
+  # 'Continue' so Vale's stderr is captured instead of terminating the script
+  # (Windows PowerShell 5.1) or vanishing (7.x). Exit 2 means Vale itself failed.
+  $ErrorActionPreference = "Continue"
   if ($stdin.ContainsKey($ext)) {
-    $json = Get-Content -Raw -LiteralPath $f.FullName | vale --config="$Config" --ext=".$($stdin[$ext])" --minAlertLevel=$Level --output=JSON 2>$null
+    $out = Get-Content -Raw -Encoding UTF8 -LiteralPath $f.FullName | vale --config="$Config" --ext=".$($stdin[$ext])" --minAlertLevel=$Level --output=JSON 2>&1
     $stdinCount++
   } else {
-    $json = vale --config="$Config" --minAlertLevel=$Level --output=JSON $f.FullName 2>$null
+    $out = vale --config="$Config" --minAlertLevel=$Level --output=JSON $f.FullName 2>&1
   }
+  $code = $LASTEXITCODE
+  $ErrorActionPreference = "Stop"
+  $errs = @($out | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
+  if ($code -ge 2) { throw "vale failed on $($f.FullName): $($errs -join ' ')" }
+  $json = ($out | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }) -join "`n"
   if (-not $json) { continue }
   try { $parsed = $json | ConvertFrom-Json } catch { continue }
   foreach ($prop in $parsed.PSObject.Properties) {

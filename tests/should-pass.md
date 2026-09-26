@@ -42,3 +42,12 @@ The vendor's guide says "retention should delve into business needs." We read th
 > The restore worked on the first try. Took ten minutes.
 
 That quote is from the last real restore, in August 2026.
+
+## Restore history
+
+Restores by year: 2024 14; 2025 22; 2026 9; total 45.
+
+| Folder | Owners | Notes |
+|---|---|---|
+| finance | Ana; Raj; Lee | Month-end close; audit copies; tax files |
+| legal | Mo; Priya | Contracts; holds; exports |
