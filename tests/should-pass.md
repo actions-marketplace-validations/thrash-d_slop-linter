@@ -55,6 +55,14 @@ Only approved programs run on the file server.
 
 Admins use a separate account for admin work.
 
+## Run it
+
+Start the job from the scheduler, not a shell, so it runs as the service account.
+
+## Tell us if a restore fails
+
+Post the job ID in the channel. You may need the log too.
+
 ## Restore history
 
 Restores by year: 2024 14; 2025 22; 2026 9; total 45.
