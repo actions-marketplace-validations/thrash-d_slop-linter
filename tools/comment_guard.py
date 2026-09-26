@@ -86,7 +86,9 @@ def ps1_code(text):
                     continue
                 in_block = True
                 break
-            elif c == "#":
+            # PowerShell starts a comment only where a token can start: `a#b`
+            # and `https://x/#frag` are single tokens, not code plus a comment.
+            elif c == "#" and (i == 0 or line[i - 1] in " \t;(){}|,=&"):
                 break
             else:
                 code.append(c)
