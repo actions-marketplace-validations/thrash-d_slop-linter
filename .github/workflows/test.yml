@@ -26,3 +26,6 @@ jobs:
 
       - name: Every rule fires on the samples, and clean files stay clean
         run: python3 tests/run_tests.py
+
+      - name: The comment guard tells PowerShell comments from code
+        run: python3 tests/test_comment_guard.py
