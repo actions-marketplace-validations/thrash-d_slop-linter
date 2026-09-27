@@ -155,6 +155,31 @@ Keep a copy of each file before the edit, and compare against it. The guard supp
 - If a program parses data out of a comment block, like a YAML manifest, add `--protect START END` with the block's opening and closing marker text. The guard then fails if anything between the markers changed. You can repeat `--protect` for more than one kind of block.
 - JavaScript and TypeScript checks need Node.js and a `typescript` package. The guard finds it through the `SLOP_TS_MODULE` environment variable or the nearest `node_modules`.
 
+## Lint commit messages
+
+`tools/commit_lint.py` flags commit messages that restate the diff instead of giving the reason, and messages that carry an AI tool's fingerprints. It doesn't enforce a style. "fixed memory leak in Atomics.store (#537)", "redis-cli: fix #5096 double error message.", and a kernel-style body with trailers all pass.
+
+It works in three tiers:
+
+- Attribution always blocks: a `Co-Authored-By` or `Signed-off-by` trailer naming an AI tool, `Assisted-by` and similar disclosure trailers, "Generated with Claude Code" lines, the robot emoji, Replit agent trailers, and agent author names like `(aider)` or `devin-ai-integration[bot]`. Mentioning Claude or an LLM in ordinary prose doesn't count.
+- Weak tells add up to a score: a body of bullets that mirror the changed files, a list of file names, "for better readability" and similar benefit tails, "This commit introduces", Markdown in the body, a long body for a tiny diff, a claim of tests when no test file changed, and a body with no reason in it. First person, a real reference like `Reported-by:` or a revert, a measurement, or a quoted error lowers the score. A score of 4 warns and 8 blocks.
+- History reports style across many commits: which commits scored highest, whether every commit has the same shape, and where the style changed suddenly, which is often where an AI tool started writing the messages.
+
+```sh
+python tools/commit_lint.py .git/COMMIT_EDITMSG    # as a commit-msg hook
+python tools/commit_lint.py --commit HEAD           # one commit
+python tools/commit_lint.py --range main..HEAD      # each commit in a range, report only
+python tools/commit_lint.py --history 200           # the last 200 commits, report only
+```
+
+To run it on every commit, call it from `.git/hooks/commit-msg` with the message file git passes as `$1`. A repo can set its own thresholds, turn off rules, or allow a trailer it wants to keep in `.devkit/commit-lint.json`:
+
+```json
+{"warn": 4, "block": 8, "disable": ["backticks"], "allow_trailers": ["Assisted-by"]}
+```
+
+Claude Code adds a co-author trailer and a "Generated with" line by default. Set `"attribution": {"commit": "", "pr": ""}` in `~/.claude/settings.json` to turn both off. In VS Code, set `git.addAICoAuthor` to `off` to stop the Copilot co-author trailer.
+
 ## Rule levels
 
 Each rule has one of three levels:
