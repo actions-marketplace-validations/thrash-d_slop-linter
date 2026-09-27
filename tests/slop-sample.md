@@ -34,4 +34,6 @@ This result underscores the risk.
 
 Needless to say, this fires. Obviously it does, and of course it's worth noting, as you'd expect. As mentioned above, everyone knows that.
 
+This is the part nobody talks about. In incident response terms, the cat was a single point of failure.
+
 ## A heading with an aside (HeadingAside sample)

@@ -1,6 +1,6 @@
 # slop-linter
 
-Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 50 rules, 37 for prose and 13 for code comments.
+Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 52 rules, 39 for prose and 13 for code comments.
 
 It also comes with two tools: a Claude Code hook that lints what Claude writes as it writes it, and a guard that proves an AI comment cleanup didn't change the code.
 

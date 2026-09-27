@@ -8,8 +8,13 @@
    so ordinary writing doesn't trip a rule. They're linted twice: with the
    plain config, and with a vocabulary active, the way dev-kit repos run.
 
+3. Optional: every .md and .txt file under SLOP_CORPUS (paths separated by
+   os.pathsep, files or folders) produces zero alerts at warning level.
+   Point it at your own finished writing. CurlyQuotes is skipped there
+   because `vale fix` straightens those.
+
 Uses vale from PATH, or the path in the VALE environment variable. Exits 1 if
-either check fails.
+any check fails.
 """
 
 import json
@@ -27,9 +32,9 @@ DIRTY = {"NoSlop": ROOT / "tests" / "slop-sample.md", "NoSlopCode": ROOT / "test
 CLEAN = [ROOT / "tests" / "should-pass.md", ROOT / "tests" / "should-pass.py", ROOT / "tests" / "should-pass.html"]
 
 
-def lint(path: Path, config: Path = CONFIG) -> list[dict]:
+def lint(path: Path, config: Path = CONFIG, level: str = "suggestion") -> list[dict]:
     result = subprocess.run(
-        [VALE, f"--config={config}", "--minAlertLevel=suggestion", "--output=JSON", str(path)],
+        [VALE, f"--config={config}", f"--minAlertLevel={level}", "--output=JSON", str(path)],
         capture_output=True, text=True, encoding="utf-8", check=False,
     )
     if result.returncode > 1:
@@ -77,6 +82,21 @@ def main() -> int:
                 for a in alerts:
                     print(f"  line {a['Line']}: {a['Check']}: {a['Message']}")
                 failed |= bool(alerts)
+
+    for entry in filter(None, os.environ.get("SLOP_CORPUS", "").split(os.pathsep)):
+        base = Path(entry)
+        files = [base] if base.is_file() else sorted(
+            p for p in base.rglob("*") if p.suffix in (".md", ".txt")
+        )
+        if not files:
+            print(f"corpus: nothing to lint at {base}")
+            failed = True
+        for path in files:
+            alerts = [a for a in lint(path, level="warning") if a["Check"] != "NoSlop.CurlyQuotes"]
+            print(f"corpus {path.name}: {len(alerts)} alerts")
+            for a in alerts:
+                print(f"  line {a['Line']}: {a['Check']}: {a['Message']}")
+            failed |= bool(alerts)
 
     return 1 if failed else 0
 
