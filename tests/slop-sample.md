@@ -36,4 +36,6 @@ Needless to say, this fires. Obviously it does, and of course it's worth noting,
 
 This is the part nobody talks about. In incident response terms, the cat was a single point of failure.
 
+That's not a metaphor, and you don't have to take my word for it. If you just read that sentence and nodded, now go fix something.
+
 ## A heading with an aside (HeadingAside sample)

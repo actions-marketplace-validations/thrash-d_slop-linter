@@ -67,6 +67,8 @@ Post the job ID in the channel. You may need the log too.
 
 In real terms, the storage bill fell by a third after the retention change. Nobody talks to the vendor about renewals, so the date is on the team calendar. The part nobody wants to do is the yearly restore test, which is why it has an owner.
 
+Go look at the log before you open a ticket. As I said in the handoff, the job skips locked files. [TODO: circle back and add the lock list here, this essay is about delving.]
+
 ## Restore history
 
 Restores by year: 2024 14; 2025 22; 2026 9; total 45.
