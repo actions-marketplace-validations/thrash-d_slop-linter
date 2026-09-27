@@ -29,3 +29,6 @@ jobs:
 
       - name: The comment guard tells PowerShell comments from code
         run: python3 tests/test_comment_guard.py
+
+      - name: The commit linter flags AI-looking messages and passes human ones
+        run: python3 tests/test_commit_lint.py
