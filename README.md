@@ -113,6 +113,20 @@ In a git repo, the runner lints only files git tracks. Add `-All` to lint every 
 
 `-Exclude` adds folder names to skip on top of the defaults (`node_modules`, `.git`, `dist`, `build`, virtual environments, and caches). Content folders like `data/` aren't skipped by default, so exclude generated output yourself. `-OutFile` writes every hit as tab-separated values.
 
+## Run it in GitHub Actions
+
+The repo is also a GitHub Action. It installs Vale, lints the files you name with these rules, and puts each hit on its line in the pull request:
+
+```yaml
+- uses: actions/checkout@v5
+- uses: thrash-d/slop-linter@v1
+  with:
+    files: README.md docs/
+    fail-on: warning
+```
+
+`files` defaults to the whole repo. `fail-on` sets the lowest level that fails the step: `error` (the default), `warning`, or `none` to report without failing. To use your own `.vale.ini`, pass its path as `config`. The action runs on Linux runners.
+
 ## Run it as a hook
 
 `hook/vale-hook.ps1` is a Claude Code `PostToolUse` hook. After every Write, Edit, or MultiEdit, it lints what Claude wrote. If anything at warning level or higher is left, it exits with code 2, which sends the hits back to Claude to fix.

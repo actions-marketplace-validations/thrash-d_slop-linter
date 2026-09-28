@@ -1,0 +1,50 @@
+name: slop-linter
+description: Flag AI writing tells in docs and code comments, like "delve", em dashes, and comments that narrate the code.
+author: Thrash'd
+branding:
+  icon: feather
+  color: red
+
+inputs:
+  files:
+    description: Files or folders to lint, space-separated.
+    default: "."
+  fail-on:
+    description: Fail the step on findings at this level or above. One of error, warning, or none.
+    default: error
+  config:
+    description: Your own .vale.ini. Leave empty to use slop-linter's, which lints Markdown, text, HTML, and code comments.
+    default: ""
+  vale-version:
+    description: Vale version to install.
+    default: "3.22.0"
+
+runs:
+  using: composite
+  steps:
+    - name: Install Vale
+      shell: bash
+      env:
+        VALE_VERSION: ${{ inputs.vale-version }}
+      run: |
+        set -euo pipefail
+        if [ "$RUNNER_OS" != "Linux" ]; then echo "::error::slop-linter runs on Linux runners only."; exit 1; fi
+        mkdir -p "$RUNNER_TEMP/vale"
+        curl -sSfL "https://github.com/vale-cli/vale/releases/download/v${VALE_VERSION}/vale_${VALE_VERSION}_Linux_64-bit.tar.gz" | tar -xz -C "$RUNNER_TEMP/vale" vale
+
+    - name: Lint
+      shell: bash
+      env:
+        FILES: ${{ inputs.files }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        CONFIG: ${{ inputs.config }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -uo pipefail
+        config="${CONFIG:-$ACTION_PATH/.vale.ini}"
+        # FILES is split on spaces on purpose: it's a list of paths.
+        # shellcheck disable=SC2086
+        "$RUNNER_TEMP/vale/vale" --output=JSON --config "$config" $FILES > "$RUNNER_TEMP/vale.json"
+        # Vale exits 1 on findings and 2 when it can't run.
+        [ $? -le 1 ] || { cat "$RUNNER_TEMP/vale.json"; exit 2; }
+        python3 "$ACTION_PATH/tools/annotate.py" "$FAIL_ON" < "$RUNNER_TEMP/vale.json"

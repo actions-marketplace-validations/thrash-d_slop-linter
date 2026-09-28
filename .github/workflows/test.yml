@@ -32,3 +32,28 @@ jobs:
 
       - name: The commit linter flags AI-looking messages and passes human ones
         run: python3 tests/test_commit_lint.py
+
+  # The published action, run the way a user runs it.
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Clean samples pass
+        uses: ./
+        with:
+          files: tests/should-pass.md tests/should-pass.html
+          fail-on: warning
+
+      - name: The slop sample fails
+        id: slop
+        continue-on-error: true
+        uses: ./
+        with:
+          files: tests/slop-sample.md
+
+      - name: Check the slop sample failed
+        if: steps.slop.outcome != 'failure'
+        run: |
+          echo "::error::The action passed tests/slop-sample.md."
+          exit 1
