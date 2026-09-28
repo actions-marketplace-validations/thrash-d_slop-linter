@@ -45,6 +45,12 @@ jobs:
           files: tests/should-pass.md tests/should-pass.html
           fail-on: warning
 
+      - name: fail-on none reports without failing
+        uses: ./
+        with:
+          files: tests/slop-sample.md
+          fail-on: none
+
       - name: The slop sample fails
         id: slop
         continue-on-error: true

@@ -42,9 +42,11 @@ runs:
       run: |
         set -uo pipefail
         config="${CONFIG:-$ACTION_PATH/.vale.ini}"
+        # Vale exits 1 on findings and 2 when it can't run. The || keeps bash's
+        # -e from ending the step on a 1.
+        rc=0
         # FILES is split on spaces on purpose: it's a list of paths.
         # shellcheck disable=SC2086
-        "$RUNNER_TEMP/vale/vale" --output=JSON --config "$config" $FILES > "$RUNNER_TEMP/vale.json"
-        # Vale exits 1 on findings and 2 when it can't run.
-        [ $? -le 1 ] || { cat "$RUNNER_TEMP/vale.json"; exit 2; }
+        "$RUNNER_TEMP/vale/vale" --output=JSON --config "$config" $FILES > "$RUNNER_TEMP/vale.json" || rc=$?
+        [ "$rc" -le 1 ] || { cat "$RUNNER_TEMP/vale.json"; exit 2; }
         python3 "$ACTION_PATH/tools/annotate.py" "$FAIL_ON" < "$RUNNER_TEMP/vale.json"
