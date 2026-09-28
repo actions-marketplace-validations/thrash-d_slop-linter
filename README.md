@@ -125,7 +125,7 @@ The repo is also a GitHub Action. It installs Vale, lints the files you name wit
     fail-on: warning
 ```
 
-`files` defaults to the whole repo. `fail-on` sets the lowest level that fails the step: `error` (the default), `warning`, or `none` to report without failing. To use your own `.vale.ini`, pass its path as `config`. The action runs on Linux runners.
+`files` defaults to the whole repo. `fail-on` sets the lowest level that fails the step: `error` (the default), `warning`, or `none` to report without failing. To use your own `.vale.ini`, pass its path as `config`. The action runs on Linux runners. GitHub shows up to 10 annotations of each level per step; the step log lists every hit.
 
 ## Run it as a hook
 
