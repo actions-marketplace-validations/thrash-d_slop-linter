@@ -27,7 +27,9 @@ $ErrorActionPreference = 'Stop'
 
 # PowerShell 5.1 reads stdin in the OEM code page, which mangles non-ASCII paths.
 [Console]::InputEncoding = New-Object Text.UTF8Encoding $false
-try { $payload = [Console]::In.ReadToEnd() | ConvertFrom-Json } catch { exit 0 }
+# A Windows PowerShell 5.1 caller prefixes piped text with a byte-order mark,
+# which ConvertFrom-Json rejects.
+try { $payload = [Console]::In.ReadToEnd().TrimStart([char]0xFEFF) | ConvertFrom-Json } catch { exit 0 }
 $path = $payload.tool_input.file_path
 if (-not $path) { exit 0 }
 
