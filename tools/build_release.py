@@ -2,7 +2,7 @@
 
     python tools/build_release.py
 
-Writes dist/NoSlop.zip and dist/NoSlopCode.zip. Each zip holds one style
+Writes dist/NoSlop.zip, dist/NoSlopCode.zip, and dist/NoSlopLinkedIn.zip. Each zip holds one style
 folder with the same name, which is the layout `vale sync` expects. Attach
 both files to a GitHub release.
 """
@@ -16,7 +16,7 @@ DIST = ROOT / "dist"
 
 def main() -> None:
     DIST.mkdir(exist_ok=True)
-    for style in ("NoSlop", "NoSlopCode"):
+    for style in ("NoSlop", "NoSlopCode", "NoSlopLinkedIn"):
         src = ROOT / "styles" / style
         out = DIST / f"{style}.zip"
         with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:

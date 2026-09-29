@@ -1,6 +1,6 @@
 # slop-linter
 
-Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 57 rules, 44 for prose and 13 for code comments.
+Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 77 rules: 44 for prose, 13 for code comments, and 20 for LinkedIn posts.
 
 It also comes with two tools: a Claude Code hook that lints what Claude writes as it writes it, and a guard that proves an AI comment cleanup didn't change the code.
 
@@ -63,12 +63,15 @@ If you only want the rules, install them as Vale packages. Add the `Packages` li
 ```ini
 StylesPath = styles
 MinAlertLevel = warning
-Packages = https://github.com/thrash-d/slop-linter/releases/latest/download/NoSlop.zip, https://github.com/thrash-d/slop-linter/releases/latest/download/NoSlopCode.zip
+Packages = https://github.com/thrash-d/slop-linter/releases/latest/download/NoSlop.zip, https://github.com/thrash-d/slop-linter/releases/latest/download/NoSlopCode.zip, https://github.com/thrash-d/slop-linter/releases/latest/download/NoSlopLinkedIn.zip
 
 [*.{md,txt}]
 BasedOnStyles = NoSlop
 TokenIgnores = ("[^"\n]+?")
 BlockIgnores = (?m)^>[^\n]*$
+
+[*.linkedin.{md,txt}]
+BasedOnStyles = NoSlop, NoSlopLinkedIn
 
 [*.{py,js,ts,tsx,ps1}]
 BasedOnStyles = NoSlop, NoSlopCode
@@ -234,7 +237,7 @@ Every rule here exists because the same thing got cut out of an AI draft twice. 
 
    The script checks that every rule fires at least once on the samples, and that `tests/should-pass.md` and `tests/should-pass.py` produce zero alerts. Those two files are ordinary technical writing. If your rule flags them, narrow it. If you find a false positive in the wild, add the sentence to one of them.
 
-To cut a release, run `python tools/build_release.py` and attach `dist/NoSlop.zip` and `dist/NoSlopCode.zip` to a GitHub release.
+To cut a release, run `python tools/build_release.py` and attach `dist/NoSlop.zip`, `dist/NoSlopCode.zip`, and `dist/NoSlopLinkedIn.zip` to a GitHub release.
 
 Commas inside a `TokenIgnores` or `BlockIgnores` regex in `.vale.ini` split the value. Write `+?` instead of `{1,400}`.
 
@@ -248,6 +251,54 @@ Known gaps:
 - `BlockIgnores` and `TokenIgnores` don't apply to code files, because Vale pulls out comments first. Filter protected comment blocks in your own tooling.
 - `EmDashCount` counts per paragraph, not per file.
 - In an aligned comment table, the widest row still flags `EmDash` if only one space separates it from the dash.
+
+## LinkedIn posts
+
+`NoSlopLinkedIn` scores posts written for LinkedIn. NoSlop looks for AI prose tells; this style looks for the templates people use to farm the feed, whoever wrote them: engagement bait, humblebrags, brag metrics, broetry, and the rest. It has 20 rules.
+
+It only runs on files you opt in by name, so it never fires on a README or a code comment. Save a draft as `post.linkedin.md` or `post.linkedin.txt`. This repo's `.vale.ini` already has the section; with the packages, add it yourself (see [Styles only](#styles-only)). Lint one post per file, because the hashtag, bullet, and broetry rules count across the whole file.
+
+It flags:
+
+- Closers and bait: "Agree?", "Thoughts?", "Comment X and I'll DM you", "Repost to help your network", "Link in the comments".
+- Humblebrags and brag metrics: "(I've been asked not to share the numbers yet)", "(Posting this from Bali.)", "8-figure", "grew to 50k followers in 90 days".
+- Templates: humble announcements, redemption arcs, lessons from a toddler, contrarian hooks, hiring parables, and crying-CEO posts.
+- Shapes: broetry, hashtag walls, pasted-symbol bullets, Unicode bold letters, and strings of emoji at line ends.
+
+A post like this:
+
+```text
+I got fired in 2019.
+
+I was broke. I slept in my car.
+
+Nobody would return my calls.
+
+Today I run an 8-figure business.
+
+Read that again.
+
+Agree?
+
+#Leadership #Growth #Mindset #Hustle
+```
+
+gets six alerts:
+
+```text
+ 1:1   warning  Broetry: most paragraphs are one sentence.   NoSlopLinkedIn.Broetry
+ 1:7   warning  Redemption arc: hardship up top, a win ...   NoSlopLinkedIn.Arc
+ 7:16  warning  '8-figure' is an unsourced brag metric.      NoSlopLinkedIn.Metrics
+ 9:1   error    Hook opener: 'Read that again'.              NoSlop.HookOpeners
+ 11:1  warning  'Agree?' is an engagement-bait closer.       NoSlopLinkedIn.Closers
+ 13:1  warning  Hashtag wall.                                NoSlopLinkedIn.Hashtags
+```
+
+The same story told straight gets none:
+
+```text
+I was laid off in 2019 and spent six months looking for work. The company I started after that now has 40 employees and sells scheduling software to dental offices.
+```
 
 ## Credits
 
