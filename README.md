@@ -1,6 +1,6 @@
 # slop-linter
 
-Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 55 rules, 42 for prose and 13 for code comments.
+Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 57 rules, 44 for prose and 13 for code comments.
 
 It also comes with two tools: a Claude Code hook that lints what Claude writes as it writes it, and a guard that proves an AI comment cleanup didn't change the code.
 
@@ -203,7 +203,7 @@ Claude Code adds a co-author trailer and a "Generated with" line by default. Set
 Each rule has one of three levels:
 
 - `error`: almost always an AI tell. Examples are "delve", "serves as a", chatbot phrases ("I hope this helps"), hook openers ("Have you ever wondered"), a trailing ", highlighting", and more than two em dashes in one paragraph.
-- `warning`: likely a tell. Examples are filler, hedges, transition words, LinkedIn-isms, a single em dash, Title Case subheadings, and bold-header lists.
+- `warning`: likely a tell. Examples are filler, hedges, transition words, LinkedIn-isms, a single em dash, arrows (`→`) and dot separators (`·`), Title Case subheadings, and bold-header lists.
 - `suggestion`: patterns that good writers also use, like "not X, it's Y", "Here's the thing", "genuinely", and an uncontracted "is not". Vale shows them, but they never block.
 
 The hook runs with `--minAlertLevel=warning`, so errors and warnings block and suggestions only inform. On the command line, Vale exits with a nonzero code only for errors. To see suggestions, run Vale with `--minAlertLevel=suggestion` or `run-qa.ps1 -Level suggestion`.

@@ -69,6 +69,8 @@ In real terms, the storage bill fell by a third after the retention change. Nobo
 
 Go look at the log before you open a ticket. As I said in the handoff, the job skips locked files. [TODO: circle back and add the lock list here, this essay is about delving.]
 
+To change the schedule, open Settings, then Jobs, then Backup. The migration script prints old -> new for each renamed share, including the Catalan team's col·lecció folder.
+
 ## Restore history
 
 Restores by year: 2024 14; 2025 22; 2026 9; total 45.

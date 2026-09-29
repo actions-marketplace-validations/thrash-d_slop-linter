@@ -38,4 +38,6 @@ This is the part nobody talks about. In incident response terms, the cat was a s
 
 That's not a metaphor, and you don't have to take my word for it. If you just read that sentence and nodded, now go fix something.
 
+Open Settings → Billing → Invoices. 5 min read · Updated weekly • Free.
+
 ## A heading with an aside (HeadingAside sample)
