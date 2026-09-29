@@ -8,7 +8,12 @@
    so ordinary writing doesn't trip a rule. They're linted twice: with the
    plain config, and with a vocabulary active, the way dev-kit repos run.
 
-3. Optional: every .md and .txt file under SLOP_CORPUS (paths separated by
+3. LinkedIn posts in tests/linkedin, which opt into NoSlopLinkedIn by their
+   .linkedin.md name. Each should-flag post meets the warning count in its
+   `<!-- min: N ... -->` header, every NoSlopLinkedIn rule fires on at least
+   one of them, and should-pass posts get zero warnings.
+
+4. Optional: every .md and .txt file under SLOP_CORPUS (paths separated by
    os.pathsep, files or folders) produces zero alerts at warning level.
    Point it at your own finished writing. CurlyQuotes is skipped there
    because `vale fix` straightens those.
@@ -19,6 +24,7 @@ any check fails.
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -30,6 +36,8 @@ CONFIG = ROOT / ".vale.ini"
 VALE = os.environ.get("VALE", "vale")
 DIRTY = {"NoSlop": ROOT / "tests" / "slop-sample.md", "NoSlopCode": ROOT / "tests" / "slop-sample.py"}
 CLEAN = [ROOT / "tests" / "should-pass.md", ROOT / "tests" / "should-pass.py", ROOT / "tests" / "should-pass.html"]
+LINKEDIN = ROOT / "tests" / "linkedin"
+MIN_HEADER = re.compile(r"<!-- min: (\d+)")
 
 
 def lint(path: Path, config: Path = CONFIG, level: str = "suggestion") -> list[dict]:
@@ -82,6 +90,31 @@ def main() -> int:
                 for a in alerts:
                     print(f"  line {a['Line']}: {a['Check']}: {a['Message']}")
                 failed |= bool(alerts)
+
+    fired = set()
+    for post in sorted((LINKEDIN / "should-flag").glob("*.linkedin.md")):
+        header = MIN_HEADER.search(post.read_text(encoding="utf-8"))
+        if not header:
+            print(f"{post.name}: no <!-- min: N --> header")
+            failed = True
+            continue
+        want = int(header.group(1))
+        got = len(lint(post, level="warning"))
+        fired |= {a["Check"] for a in lint(post)}
+        print(f"{post.name}: {got} warnings, needs {want}")
+        failed |= got < want
+    rules = {f"NoSlopLinkedIn.{p.stem}" for p in (ROOT / "styles" / "NoSlopLinkedIn").glob("*.yml")}
+    dead = sorted(rules - fired)
+    print(f"NoSlopLinkedIn: {len(rules) - len(dead)}/{len(rules)} rules fire on tests/linkedin/should-flag")
+    for rule in dead:
+        print(f"  dead: {rule}")
+    failed |= bool(dead)
+    for post in sorted((LINKEDIN / "should-pass").glob("*.linkedin.md")):
+        alerts = lint(post, level="warning")
+        print(f"{post.name}: {len(alerts)} warnings")
+        for a in alerts:
+            print(f"  line {a['Line']}: {a['Check']}: {a['Message']}")
+        failed |= bool(alerts)
 
     for entry in filter(None, os.environ.get("SLOP_CORPUS", "").split(os.pathsep)):
         base = Path(entry)

@@ -1,0 +1,10 @@
+extends: existence
+message: "'%s' is an unsourced brag metric. Give the real number and where it's from, or cut it."
+level: warning
+ignorecase: true
+nonword: true
+tokens:
+  - '\b\d{1,2}-figure\b'
+  - '\b\d+(?:\.\d)?[km] followers\b'
+  - '\b\d+x(?:[''’]?d|ed)\b'
+  - '\bin (?:just )?\d+ days\b'

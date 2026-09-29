@@ -1,0 +1,8 @@
+extends: existence
+message: "'%s' is a humblebrag aside. Cut it or state the fact."
+level: warning
+ignorecase: true
+nonword: true
+tokens:
+  - '\((?:I[''’]?ve been asked not to share|not bragging|this still feels surreal|still (?:getting used to|pinching myself)|posting this from|took this call from|yes, we[''’]?re hiring|shoutout to my)[^)\n]*\)'
+  - ', by the way\.'
