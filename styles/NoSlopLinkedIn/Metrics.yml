@@ -7,4 +7,5 @@ tokens:
   - '\b\d{1,2}-figure\b'
   - '\b\d+(?:\.\d)?[km] followers\b'
   - '\b\d+x(?:[''’]?d|ed)\b'
-  - '\bin (?:just )?\d+ days\b'
+  # Only after a growth verb: "the conference is in 4 days" isn't a brag.
+  - '\b(?:grew|scaled|hit|reached|doubled|tripled)\b[^.\n]{0,40}\bin (?:just |only )?\d+ days\b'
