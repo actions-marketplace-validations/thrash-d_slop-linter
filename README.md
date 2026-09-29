@@ -67,10 +67,14 @@ Packages = https://github.com/thrash-d/slop-linter/releases/latest/download/NoSl
 
 [*.{md,txt}]
 BasedOnStyles = NoSlop
+TokenIgnores = ("[^"\n]+?")
+BlockIgnores = (?m)^>[^\n]*$
 
 [*.{py,js,ts,tsx,ps1}]
 BasedOnStyles = NoSlop, NoSlopCode
 ```
+
+The packages hold only the rules, so the two ignore lines have to live in your config. They skip double-quoted text and blockquotes, which are someone else's words or an example of a phrase, not your prose. Without them, a README that quotes "delve" as a word to avoid gets flagged for it.
 
 Then create the styles folder and sync:
 
