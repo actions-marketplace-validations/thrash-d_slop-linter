@@ -18,3 +18,8 @@ tokens:
   - '\bbookmark this\b'
   - '\bP\.S\. (?:save|repost|follow|comment|share|DM|tag)\b'
   - '\blink in (?:the )?(?:first )?comments?\b'
+  - '\breposts? appreciated\b'
+  - '\blike this post\b'
+  - '\bconnect with me so I can DM you\b'
+  - '\bgiving away my\b[^.\n]{0,40}\bfor free\b'
+  - '\bsettle a debate for me\b'

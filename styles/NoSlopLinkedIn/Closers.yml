@@ -11,3 +11,6 @@ tokens:
   - '\bchange my mind\b'
   - '\bwhich one (?:hits|resonates|speaks)[^?\n]{0,30}\?'
   - '\bwho else\b[^?\n]{0,60}\?'
+  - '\bare you ready\?'
+  - '\bwho[''’]s (?:been here|with me)\b[^?\n]{0,30}\?'
+  - '\bsurprised by these results\?'
