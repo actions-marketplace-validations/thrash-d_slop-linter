@@ -88,7 +88,7 @@ vale sync
 
 Some prose rules, like heading case and contractions, make no sense inside a code comment. This repo's [`.vale.ini`](.vale.ini) turns them off for code files. Copy its code section into yours.
 
-The `latest` URLs pick up new rules as soon as they're released. To control when that happens, replace `latest/download` with `download/TAG` for a specific release.
+The `latest` URLs pick up new rules as soon as they're released. To control when that happens, replace `latest/download` with `download/TAG`, using a tag from the [releases page](https://github.com/thrash-d/slop-linter/releases). Each release lists what changed.
 
 ### Full toolkit
 
