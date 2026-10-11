@@ -1,6 +1,6 @@
 extends: existence
 message: "Em dash. Use a period, comma, or parentheses."
-level: warning
+level: error
 nonword: true
 tokens:
   # An em dash after a wide gap is a column separator in an aligned comment

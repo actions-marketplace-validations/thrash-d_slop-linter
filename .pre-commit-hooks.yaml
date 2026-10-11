@@ -1,0 +1,13 @@
+- id: slop-lint
+  name: slop-lint
+  description: Lint staged prose and code comments with the NoSlop rules.
+  entry: hook/pre-commit-vale.sh
+  language: script
+  files: \.(md|txt|py|js|mjs|cjs|ts|tsx|ps1)$
+
+- id: commit-lint
+  name: commit-lint
+  description: Block AI attribution and commit messages that only restate the diff.
+  entry: tools/commit_lint.py
+  language: script
+  stages: [commit-msg]

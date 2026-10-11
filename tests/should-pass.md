@@ -79,3 +79,7 @@ Restores by year: 2024 14; 2025 22; 2026 9; total 45.
 |---|---|---|
 | finance | Ana; Raj; Lee | Month-end close; audit copies; tax files |
 | legal | Mo; Priya | Contracts; holds; exports |
+
+## Parody and satire as genres
+
+Parody is hard to write. The joke lands. That's it for setup. Is this a question? Yes.

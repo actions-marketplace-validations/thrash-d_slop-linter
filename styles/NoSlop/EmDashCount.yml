@@ -1,6 +1,0 @@
-extends: occurrence
-message: "More than 2 em dashes in one piece. That's a structural habit, not an accent."
-level: error
-scope: text
-max: 2
-token: '(?:^|\S) ?—'

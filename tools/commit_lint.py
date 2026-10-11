@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Flag commit messages that describe the diff instead of the reason, or that
 carry an AI tool's fingerprints.
 

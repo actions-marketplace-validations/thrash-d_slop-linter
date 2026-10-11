@@ -1,0 +1,7 @@
+extends: existence
+message: "'%s' labels the text's own genre or tone. Let the writing do it."
+level: warning
+nonword: true
+# A one-word sentence only, so "Parody is hard." and "the joke." don't match.
+tokens:
+  - '(?:^|[.!?] +)(?:Parody|Satire|Sarcasm|Irony|Joke|Kidding)\.(?:\s|$)'

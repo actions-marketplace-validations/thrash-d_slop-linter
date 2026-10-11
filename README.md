@@ -1,6 +1,6 @@
 # slop-linter
 
-Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 77 rules: 44 for prose, 13 for code comments, and 20 for LinkedIn posts.
+Vale rules for the stuff AI writing does and people don't: "delve," em dashes everywhere, "Here's the thing," hedges stacked three deep, and code comments that narrate every line. There are 79 rules: 46 for prose, 13 for code comments, and 20 for LinkedIn posts.
 
 It also comes with two tools: a Claude Code hook that lints what Claude writes as it writes it, and a guard that proves an AI comment cleanup didn't change the code.
 
@@ -21,13 +21,13 @@ This repo covers ground the others don't:
 $ vale --config=.vale.ini example.md
 
  example.md
- 1:4   warning  Use sentence case for 'Getting Started'.                NoSlop.HeadingCase
- 3:1   warning  Use 'to' instead of 'In order to'.                      NoSlop.Filler
- 3:28  warning  LinkedIn-ism: 'leverage our'.                           NoSlop.LinkedIn
- 3:41  warning  Likely AI word 'robust'. Use the plain word or cut it.  NoSlop.AIWordsSoft
- 3:74  warning  Em dash. Use a period, comma, or parentheses.           NoSlop.EmDash
+ 1:4   suggestion  Use sentence case for 'Getting Started'.                NoSlop.HeadingCase
+ 3:1   warning     Use 'to' instead of 'In order to'.                      NoSlop.Filler
+ 3:28  warning     LinkedIn-ism: 'leverage our'.                           NoSlop.LinkedIn
+ 3:41  warning     Likely AI word 'robust'. Use the plain word or cut it.  NoSlop.AIWordsSoft
+ 3:74  error       Em dash. Use a period, comma, or parentheses.           NoSlop.EmDash
 
-✖ 0 errors, 5 warnings and 0 suggestions in 1 file.
+✖ 1 error, 3 warnings and 1 suggestion in 1 file.
 ```
 
 In a code file, only comments and docstrings get linted:
@@ -162,6 +162,24 @@ For example, this `command` value lints prose anywhere under a folder named `doc
 
 The hook is written for Windows PowerShell 5.1. It hasn't been tested under PowerShell 7 (`pwsh`) on macOS or Linux.
 
+## Run it with pre-commit
+
+If your repo uses [pre-commit](https://pre-commit.com), add this to its `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/thrash-d/slop-linter
+    rev: v1.3.0
+    hooks:
+      - id: slop-lint
+      - id: commit-lint
+```
+
+Then run `pre-commit install --hook-type pre-commit --hook-type commit-msg`.
+
+- `slop-lint` runs Vale with this repo's `.vale.ini` on staged `.md`, `.txt`, `.py`, `.js`, `.ts`, and `.ps1` files. Errors block the commit; warnings and suggestions don't. Vale has to be on `PATH`, and the hook needs `bash`, which Git for Windows provides.
+- `commit-lint` runs `tools/commit_lint.py` on the commit message. It needs `python3` on `PATH`.
+
 ## Check that a cleanup only touched comments
 
 Vale can't tell whether a comment is true. Comments that restate the code, stale docstrings, and comments that contradict the code need a human or an LLM to read them. If you hand that job to an LLM, `tools/comment_guard.py` checks that it changed comments and nothing else:
@@ -205,9 +223,9 @@ Claude Code adds a co-author trailer and a "Generated with" line by default. Set
 
 Each rule has one of three levels:
 
-- `error`: almost always an AI tell. Examples are "delve", "serves as a", chatbot phrases ("I hope this helps"), hook openers ("Have you ever wondered"), a trailing ", highlighting", and more than two em dashes in one paragraph.
-- `warning`: likely a tell. Examples are filler, hedges, transition words, LinkedIn-isms, a single em dash, arrows (`→`) and dot separators (`·`), Title Case subheadings, and bold-header lists.
-- `suggestion`: patterns that good writers also use, like "not X, it's Y", "Here's the thing", "genuinely", and an uncontracted "is not". Vale shows them, but they never block.
+- `error`: almost always an AI tell. Examples are "delve", "serves as a", chatbot phrases ("I hope this helps"), hook openers ("Have you ever wondered"), a trailing ", highlighting", and any em dash.
+- `warning`: likely a tell. Examples are filler, hedges, transition words, LinkedIn-isms, arrows (`→`) and dot separators (`·`), bold-header lists, question headings, and more than four of the suggestion-level voice patterns in one paragraph.
+- `suggestion`: patterns that good writers also use, like "not X, it's Y", "Here's the thing", "genuinely", an uncontracted "is not", and Title Case subheadings. Vale shows them, but they never block.
 
 The hook runs with `--minAlertLevel=warning`, so errors and warnings block and suggestions only inform. On the command line, Vale exits with a nonzero code only for errors. To see suggestions, run Vale with `--minAlertLevel=suggestion` or `run-qa.ps1 -Level suggestion`.
 
@@ -249,7 +267,6 @@ Known gaps:
 
 - Vale 3.22 skips `.mjs`, `.cjs`, `.mts`, and `.cts` files even with the `[formats]` mapping. The hook and `run-qa.ps1` work around it by linting those files as `.js` or `.ts`. For a manual run, pipe the file through standard input: `Get-Content file.mjs | vale --config=SLOP_LINTER_DIR/.vale.ini --ext=.js`.
 - `BlockIgnores` and `TokenIgnores` don't apply to code files, because Vale pulls out comments first. Filter protected comment blocks in your own tooling.
-- `EmDashCount` counts per paragraph, not per file.
 - In an aligned comment table, the widest row still flags `EmDash` if only one space separates it from the dash.
 
 ## LinkedIn posts

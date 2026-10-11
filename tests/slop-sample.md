@@ -41,3 +41,11 @@ That's not a metaphor, and you don't have to take my word for it. If you just re
 Open Settings → Billing → Invoices. 5 min read · Updated weekly • Free.
 
 ## A heading with an aside (HeadingAside sample)
+
+It is not a bug, it is a feature. Here's the thing: it genuinely does not matter, and it truly cannot.
+
+Run it once and that's the whole thing. Satire.
+
+## Just want to use it?
+
+## A note on words

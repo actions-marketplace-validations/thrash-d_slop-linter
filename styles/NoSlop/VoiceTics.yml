@@ -1,0 +1,8 @@
+extends: occurrence
+message: "More than 4 voice tics in one paragraph ('not X, it's Y', 'here's the thing', 'genuinely', uncontracted 'is not'). Once is voice; a pile is a template."
+level: warning
+scope: paragraph
+max: 4
+# The union of NotXItsY, HeresTheThing, AIAdverbs, and Contractions, which stay
+# suggestions on their own. Change those rules and this token together.
+token: '(?i)(?:\b(?:it''s|it is|this is|that''s|you''re|they''re) not [^.,;!?]{1,40}[,;]\s(?:it''s|it is|you''re|they''re|but)\b|\bhere''s (?:the thing|the kicker|why|what|how|my confession|a confession|the part)\b|\b(?:genuinely|truly|deeply|incredibly|effortlessly|quietly|fundamentally)\b|\b(?:do|does|did|is|are|was|were|will|would|should|could|have|has) not\b|\bcannot\b)'

@@ -1,0 +1,8 @@
+extends: existence
+message: "Chatty heading: '%s'. A heading is a label; name the thing."
+level: warning
+scope: heading
+nonword: true
+tokens:
+  - '\?\s*$'
+  - '^A (?:quick |short |brief )?note on\b'
