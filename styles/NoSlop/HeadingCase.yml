@@ -149,6 +149,7 @@ exceptions:
   - DFIR
   - DLP
   - EDR
+  - EPSS
   - FIDO2
   - HSM
   - IAM
