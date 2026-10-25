@@ -17,7 +17,7 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - run: |
           v=
           for f in VERSION manifest.json extension/manifest.json chrome/manifest.json package.json; do
